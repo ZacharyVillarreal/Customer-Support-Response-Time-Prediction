@@ -21,9 +21,9 @@ Zachary Villarreal
     * [What About Response Times?](#What-About-Response-Times?)
 * [Topic Modeling](#Hypothesis-Testing)
     * [Preparation](#Preparation)
+    * [Latent Dirichlet Allocation (LDA)](#Latent-Dirichlet-Allocation-(LDA))
     * [T-Distributed Stochastic Neighbor Embedding](#T-Distributed-Stoachastic-Neighbor-Embedding)
-* [Predictive Modeling](#Second-Hypothesis-Testing)
-    * [Models](#Models)
+    * [Topic Analysis](#Topic-Analysis)
 * [Conclusion](#Conclusion)
 
 
@@ -123,7 +123,7 @@ We can infer that although the hour of the day does seem to have an impact on th
 <a href="#Table-of-Contents">Back to top</a>
 
 ### What About Response Times? 
-
+----
 As mentioned above, this project is specifically looking at how we can predict a *fast* versus *slow* response time. As a result, I am interested in looking into the distribution of these response times. How each company specifically holds up to its competitors in terms of response speed on Twitter.
 
 However, I think it is crucial first to determine what makes a customer support tweet response *fast* versus *slow*.  To do this, I need to look at the distribution of these times for all companies.
@@ -146,4 +146,112 @@ Let's look at how this newly created `response speed` value is distributed over 
 <img src="graphs/Company_Response_Times.png" width="800" height="420"> 
 </p>
 
-Interesting, here we can see that the majority of responses by AmazonHelp, fall below the 27.0-minute mark, while AppleSupport's majority response time lands above the cutoff. 
+Interesting, here we can see that the majority of responses by AmazonHelp, fall below the 27.0-minute mark, while AppleSupport's majority response time lands above the cutoff. However, we want to know how, if at all, the content of the customer support inquiry's text will affect the response time.
+
+<a href="#Table-of-Contents">Back to top</a>
+
+## Topic Modeling 
+---
+### Preparation
+---
+As previously mentioned, this data set's text corpus contained roughly 700,000 documents, or tweets, that averaged in length of ten words. As you might imagine, each customer's text varies drastically in terms of spelling and use of non-ascii characters. An example of this text is here:<br>
+`Love @115940 but lost home internet&amp; just learned can’t Mirror Hulu on iPad hdmi adapter. Wanted to get Hulu live. Guess I’ll have to cancel all of Hulu &amp; look at @115946 or something like that 😢 why #Hulu why???`
+
+In order to use this text for topic modeling via clustering using [Latent Dirichlet Allocation (LDA)](#https://towardsdatascience.com/nlp-extracting-the-main-topics-from-your-dataset-using-lda-in-minutes-21486f5aa925), I needed to use preprocessing techniques to clean the text. If you are interested in these techniques, you can view them [here](src/helper.py). Below, is an example of the above tweet after using these methods.<br>
+`love lose home internet learn cant mirror hulu ipad hdmi adapter want get hulu live guess ill cancel hulu look something like hulu`<br>
+
+Once the text was cleaned, I needed to convert it to a bag of words. You can think of the bag of words as a dictionary where each key is the word and the value is the number of times that word occurs in the the data set. However, we still need a corpus representation of our bag of words, meaning that I converted each pre-processed tweet into its own word frequency dictionary.
+
+### Latent Dirichlet Allocation (LDA)
+LDA was used to classify each tweet to a particular topic. It uses the text's data that we prepared above, to build a topic per distribution model and words per topic model. Running LDA on the corpus and the bag of words we generated is actually relatively simple. It assumes that every chunk of text we input into the model is somehow related, and believes that each document, or tweet, is produced a mixture of topics. The only thing that we really need to play with, within the model, is the number of unique topics, or clusters, we believe the text contains.From multiple attemps, I discovered that the best number of topics to assign was three.
+
+### T-distributed Stochastic Neighbor Embedding
+In order to visualize the clusters produced by LDA, I needed to reduce the dimensionality of the feature matrix. Because we were going to be reducing the dimensions from 200 to 2, I wanted a method that preserved clusters high dimensionality. I finally landed on using [t-distributed stoachastic neighbor embedding](#https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding). It models each high dimensional vector in a way that similar objects, or words, are modeled by nearby points and dissimilar objects are modeled by distant points with higher probabilities.
+
+Let's look at the result we got from using TSNE to reduce dimensions on all of our customer support related tweets.
+
+<p align='center'>
+<img src="graphs/3_cluster.png" width="800" height="420"> 
+</p>
+
+
+As we can see in the case above, the methods applied to visualize the clustering of customer support text were able to group the total corpus into three distinct clusters. But what do these clusters mean? Let's explore this further.
+
+One of the things about unsupervised learning and an LDA model, is that we aren't given a topic name to the words that belong to each cluster, it is up to us humans to figure that out. Let's look at each cluster and those words that have the highest weights, or influence, to that classification.
+
+`Cluster 0:`<br>
+service, time, phone, customer, flight, order, day, thank, work, today<br>
+`Cluster 1:`<br>
+help, account, email, card, number, support, message, credit, contact, website<br>
+`Cluster 2:`<br>
+store, love, food, bag, stock, shop, staff, hand, bit, pack<br>
+
+The soft clustering provided by LDA, allowed for some insight into what the topics were mainly about in each customer support inquiry. For example, cluster/topic 1 mainly discussed issues pertaining to credit or purchasing problems, while cluster/topic 3 talked about problems related to markets or food. However, there was a less clear topic for cluster 2, it seemed that any average inquiry, or sort of those not able to be defined as cluster 2 or 3, fell within cluster 0. Let's look at some examples of the topics the LDA clustering was able to pick up, using the nearest tweets to the cluster centers.
+
+* Cluster 0: "General Customer Support Related Issues"
+    * I’ve had 4-5 outages in the past month. WTF! @Ask_Spectrum
+
+    * @AppleSupport how do I stop this auto brightness 😩😩 I like my screen dark and it just randomly gets bright
+
+
+* Cluster 1: "Billing / Payment Related Issues"
+    * @MicrosoftHelps @XboxSupport what’s this charge for? Keep getting it but cancelled everything I’m aware of https://t.co/TwELvJE9GV
+
+    * @Uber_Support i paid money...it got debited in my account still ur app showing outstanding and not allowing to book. No one is responding
+
+
+* Cluster 2: "Food / Market Related Issues"
+    * @marksandspencer y do they charge you for a meat bag at colliers woods branch. If you buy meat your required to supply customers a free bag. Poor service.
+
+    * I guess my soccer player costume wasn't good enough for a $3 burrito @ChipotleTweets
+
+It seems that, with soft clustering methods, we can somewhat cluster these tweets into descrete topics. However, remember the question I am trying to answer, what factors go into these inquiries that can make a response time fast versus slow. In order to do this, I want to look at the impact these topics, or clusters, might have on the overall response time.
+
+<a href="#Table-of-Contents">Back to top</a>
+
+### Topic Analysis
+---
+
+I wanted to start my topic analysis with cluster 0, specifically those tweets that pertained to general customer support inquiries. I think it would be both interesting and beneficial if we first take a look at the distribution of these response times for this topic.
+
+<p align='center'>
+<img src="graphs/Distribution_of_Response_Times_Billing.png" width="800" height="420"> 
+</p>
+
+Interesting, you can see here that the distribution is skewed far to the left, but if you take a look at the x-axis, you can see that the minutes to respond ranges from 0 minutes to 10,000, which is approximately a week in waiting time. Still, the median time to respond is 25 minutes and the mean resposne time is 317 minutes, which is due to the large outlier problem we discussed earlier in this paper. 
+
+Let's take a look a look at the fast versus slow comparison of response times for this topic.
+
+<p align='center'>
+<img src="graphs/General_Customer_Support_Speed.png" width="800" height="420"> 
+</p>
+
+Interesting, even though the mean time to respond was so high, it seems that the median is a better predictor for the relationship between a fast and slow response speed. Let's take a quick look at the these results for the other two generated topics.
+
+`Cluster 1: "Billing / Payment Related Inquiries"`
+<p align='center'>
+<img src="graphs/Reponse_Times_Billing.png" width="800" height="420"> 
+</p>
+
+<p align='center'>
+<img src="graphs/Billing_Customer_Support_Speed.png" width="800" height="420"> 
+</p>
+
+`Cluster 2: "Food / Market Related Inquiries"`
+<p align='center'>
+<img src="graphs/Distribution_of_Response_Times_Food.png" width="800" height="420"> 
+</p>
+
+<p align='center'>
+<img src="graphs/Food_Customer_Support_Speed.png" width="800" height="420"> 
+</p>
+
+Wow! We can see here that, while the variations might be small between each topic, they do seem to be having some degree of impact on the company's response speed. 
+
+
+
+## Conclusion
+---
+The ultimate goal of this project is not only to see how these various reponse times vary, but whether the topics we were able to generate have hit on something fundamental that translates to something that can impact this data in the future. It is clear that the topics listed above, do have an impact on the repsponse speed. The techniques I applied are not limited to this field, in fact, they can be applied across pretty much all datasets that use text. Categorizing text, through topic modeling, has almost an unlimited amount of uses. 
+
+In the future, I would like to be able to keep manipulating the number of clusters I believe the text belongs to, to try to create a clearer distinction between each topic. I would like to also use the feature vectors provided by the LDA model to input into a predictive model, to see how this performs in a train test split of the current data, to predict response speed. 
