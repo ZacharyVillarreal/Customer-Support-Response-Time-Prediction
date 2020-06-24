@@ -11,8 +11,8 @@ Zachary Villarreal
 
 ## Table of Contents
 * [Background](#Background)
+    * [Project Motivation](#Project-Motivation)
     * [Project Description](#Project-Description)
-    * [Motivation](#Motivation)
 * [Data](#Data)
     * [Pipeline](#Pipeline)
     * [Attributes](#Attributes)
@@ -31,9 +31,11 @@ Zachary Villarreal
 <a name="background"></a>
 ## Background
 
-### Project Description
+### Project Motivation
 ---
-Customer service is the assistance that a company will provide either before, during, or after a transaction is complete. Customer service is usually done through a company's website or via telephone, but as social media platforms become more commonplace, one can find these services available on these various platforms. One platform that has seen an influx of customer service interactions is Twitter. Twitter is an American social media platform on which users interact with others through shortened messages or "tweets." The content in tweets related to these specific inquiries often varies in word usage. However, they seem to be depicting some underlying subject when analyzed further.
+We, as a society, have had a steady increase in participation in online transactions. As a result, our interactions with customer teams have also increased. We have all experienced longer than wanted wait times for a response from said teams. I, along with what I am sure is a substantial proportion of people, would like to understand why these wait times are so long and why certain people or companies receive a response much faster than the test. My goal is to analyze what goes into obtaining a fast versus a slow response from a customer support team on Twitter. Specifically, I will be looking at the behaviors of text and the relationship between their respective wait times.
+
+Not only are customers seeking knowledge on how to receive a faster response, but customer support teams also try to see how their times match up against other companies within the same operating space. These teams are often under a high load of inbound requests from their customers and would like to know the analytics behind their responses. Are they targetting specific individuals faster than others, are they responding to those who include specific words within their requests, or are they just responding to those in the order they come in? This project will attempt to answer those questions, as well.
 
 <a href="#Table-of-Contents">Back to top</a>
 
@@ -41,11 +43,9 @@ Customer service is the assistance that a company will provide either before, du
 <img src="images/customer_service_team.png" width="400" height="300"> 
 </p>
 
-### Motivation
+### Project Description
 ---
-We, as a society, have had a steady increase in participation in online transactions. As a result, our interactions with customer teams have also increased. We have all experienced longer than wanted wait times for a response from said teams. I, along with what I am sure is a substantial proportion of people, would like to understand why these wait times are so long and why certain people or companies receive a response much faster than the test. My goal is to analyze what goes into obtaining a fast versus a slow response from a customer support team on Twitter. Specifically, I will be looking at the behaviors of text and the relationship between their respective wait times.
-
-Not only are customers seeking knowledge on how to receive a faster response, but customer support teams also try to see how their times match up against other companies within the same operating space. These teams are often under a high load of inbound requests from their customers and would like to know the analytics behind their responses. Are they targetting specific individuals faster than others, are they responding to those who include specific words within their requests, or are they just responding to those in the order they come in? This project will attempt to answer those questions, as well.
+This project attempts to extract multiple topics from customer support tweets using Natural Language Processing techniques and unsupervised learning. From these generated topics, we will attempt to discern between a company's "fast" response times, less than 27 minutes, and "slow" response times, greater than 27 minutes.
 
 <a href="#Table-of-Contents">Back to top</a>
 
